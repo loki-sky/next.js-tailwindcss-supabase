@@ -158,7 +158,7 @@ export default function SideBar({
   );
 
   return (
-    <div className="flex flex-col w-1/4 border-r-2 overflow-y-auto justify-between bg-[#F0F0F0] font-inter p-5">
+    <div className="flex flex-col border-r-2 overflow-y-auto justify-between bg-[#F0F0F0] font-inter p-5 h-[100%]">
       <div>
         <button
           onClick={createChannel}
@@ -203,6 +203,7 @@ export default function SideBar({
                 onClick={() => {
                   if (joinedChannels.includes(channel.id)) {
                     setSelectedChannel(channel);
+                    router.push(`/chats/${channel.id}`);
                   }
                 }}
                 className={`px-4 py-3 border-b cursor-pointer text-[17px] font-semibold flex justify-between items-center
