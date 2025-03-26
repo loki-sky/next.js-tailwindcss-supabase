@@ -205,11 +205,15 @@ export default function SideBar({
                     setSelectedChannel(channel);
                   }
                 }}
-                className={`px-4 py-4 border-b hover:bg-gray-100 cursor-pointer text-[17px] font-semibold flex justify-between items-center ${
-                  joinedChannels.includes(channel.id)
-                    ? "text-[#4399FF]"
-                    : "text-gray-500"
-                }`}
+                className={`px-4 py-3 border-b cursor-pointer text-[17px] font-semibold flex justify-between items-center
+                  ${
+                    selectedChannel?.id === channel.id
+                      ? "bg-blue-100 text-[#0066CC]"
+                      : joinedChannels.includes(channel.id)
+                      ? "hover:bg-gray-100 text-[#4399FF]"
+                      : "text-gray-500"
+                  }
+                `}
               >
                 <div>{channel.name}</div>
                 <div>
@@ -225,7 +229,7 @@ export default function SideBar({
                         e.stopPropagation();
                         handleJoin(channel);
                       }}
-                      className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs"
+                      className="px-4 py-1 bg-green-600 text-white rounded-full hover:bg-green-700 text-xs"
                     >
                       Join
                     </button>

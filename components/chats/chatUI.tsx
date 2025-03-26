@@ -120,7 +120,7 @@ export default function ChatUI({
               <div className="flex flex-col gap-2 items-center">
                 <input
                   type="text"
-                  className="w-full border rounded p-2"
+                  className="w-full border rounded p-2 text-black"
                   value={editedMessage}
                   onChange={(e) => setEditedMessage(e.target.value)}
                 />

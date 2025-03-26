@@ -4,9 +4,12 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Database } from "@/types/supabasetype";
 import SideBar from "@/components/chats/sideBar";
 import ChatUI from "@/components/chats/chatUI";
+import { useRouter } from "next/navigation";
 
 export default function Chats() {
   const supabase = createClientComponentClient<Database>();
+  const router = useRouter();
+
   const [userID, setUserID] = useState<string>("");
   const [selectedChannel, setSelectedChannel] = useState<
     Database["public"]["Tables"]["channels"]["Row"] | null
@@ -63,7 +66,7 @@ export default function Chats() {
           table: "messages",
           filter: `channel_id=eq.${selectedChannel.id}`,
         },
-        async (payload) => {
+        (payload) => {
           setMessages((prev) => [
             ...prev,
             payload.new as Database["public"]["Tables"]["messages"]["Row"],
@@ -74,12 +77,47 @@ export default function Chats() {
           }
         }
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "messages",
+          filter: `channel_id=eq.${selectedChannel.id}`,
+        },
+        (payload) => {
+          const updatedMessage =
+            payload.new as Database["public"]["Tables"]["messages"]["Row"];
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === updatedMessage.id ? updatedMessage : msg
+            )
+          );
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "messages",
+        },
+        (payload) => {
+          console.log("Deleted message:", payload.old);
+          console.log(messages);
+          const deletedMessage =
+            payload.old as Database["public"]["Tables"]["messages"]["Row"];
+          setMessages((prev) =>
+            prev.filter((msg) => msg.id !== deletedMessage.id)
+          );
+        }
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(messageSubscription);
     };
-  }, [selectedChannel]);
+  }, [selectedChannel, supabase]);
 
   const sendMessage = async (
     channelId: Database["public"]["Tables"]["channels"]["Row"]["id"],
@@ -153,10 +191,9 @@ export default function Chats() {
             id="scrollElement"
             className="flex-1 overflow-y-scroll p-4 px-14"
           >
-            {messages.map((msg, index) => (
-              <div key={index}>
+            {messages.map((msg) => (
+              <div key={msg.id}>
                 <ChatUI
-                  key={msg.id}
                   message={msg}
                   currentUser={userID}
                   updateMessage={updateMessage}
