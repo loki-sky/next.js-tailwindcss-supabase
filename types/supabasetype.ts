@@ -166,8 +166,6 @@ export interface Database {
   }
 }
 
-// Utility types for querying the database
-
 export type Tables<
   PublicTableNameOrOptions extends
     | keyof (Database["public"]["Tables"] & Database["public"]["Views"])
