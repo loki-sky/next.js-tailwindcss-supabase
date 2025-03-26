@@ -1,5 +1,5 @@
 import { useState } from "react";
-import DateFormatter from "@/app/components/date";
+import DateFormatter from "@/components/date";
 import { Database } from "@/types/supabasetype";
 import userAvatar from "@/public/user.png";
 

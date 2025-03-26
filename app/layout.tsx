@@ -1,5 +1,5 @@
 import "./globals.css";
-import SupabaseListener from "@/app/components/supabaseListener";
+import SupabaseListener from "@/components/supabaseListener";
 
 export default function RootLayout({
   children,
