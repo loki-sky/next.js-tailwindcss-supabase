@@ -117,7 +117,7 @@ export default function ChatUI({
             }  dark:border-gray-700`}
           >
             {isEditing ? (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 items-center">
                 <input
                   type="text"
                   className="w-full border rounded p-2"

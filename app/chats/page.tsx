@@ -38,7 +38,7 @@ export default function Chats() {
       .eq("channel_id", channelId)
       .order("created_at");
     if (error) {
-      console.error("Error fetching messages:", error);
+      console.error("Error fetching messages:", error.message);
     } else if (data) {
       setMessages(data);
     }
@@ -48,6 +48,37 @@ export default function Chats() {
     if (selectedChannel) {
       fetchMessages(selectedChannel.id);
     }
+  }, [selectedChannel]);
+
+  useEffect(() => {
+    if (!selectedChannel) return;
+
+    const messageSubscription = supabase
+      .channel("realtime-messages")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `channel_id=eq.${selectedChannel.id}`,
+        },
+        async (payload) => {
+          setMessages((prev) => [
+            ...prev,
+            payload.new as Database["public"]["Tables"]["messages"]["Row"],
+          ]);
+          if (scrollElement.current) {
+            scrollElement.current.scrollTop =
+              scrollElement.current.scrollHeight;
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(messageSubscription);
+    };
   }, [selectedChannel]);
 
   const sendMessage = async (
@@ -67,7 +98,6 @@ export default function Chats() {
       console.error("Error sending message:", error);
       return null;
     }
-
     return data && data.length > 0 ? data[0] : null;
   };
 
@@ -77,7 +107,6 @@ export default function Chats() {
       console.error("Error deleting message:", error);
       return;
     }
-
     setMessages((prev) => prev.filter((msg) => msg.id !== id));
   };
 
@@ -86,9 +115,7 @@ export default function Chats() {
     if (!inputText || !selectedChannel) return;
     const newMsg = await sendMessage(selectedChannel.id, userID, inputText);
     if (newMsg) {
-      setMessages((prev) => [...prev, newMsg]);
       setInputText("");
-
       if (scrollElement.current) {
         scrollElement.current.scrollTop = scrollElement.current.scrollHeight;
       }
@@ -99,39 +126,43 @@ export default function Chats() {
     id: number,
     newMessage: string
   ): Promise<void> => {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("messages")
       .update({ message: newMessage })
-      .eq("id", id)
-      .select();
+      .eq("id", id);
     if (error) {
       console.error("Error updating message:", error);
       return;
     }
-
     setMessages((prev) =>
       prev.map((msg) => (msg.id === id ? { ...msg, message: newMessage } : msg))
     );
   };
 
   return (
-    <div className="min-h-screen container mx-auto shadow-lg rounded-lg flex flex-col">
+    <div className="min-h-screen shadow-lg rounded-lg flex flex-col">
       <div className="flex flex-row flex-1 bg-white">
-        <SideBar setSelectedChannel={setSelectedChannel} />
-        <div className="w-full flex flex-col pt-10">
+        <SideBar
+          setSelectedChannel={setSelectedChannel}
+          userID={userID}
+          selectedChannel={selectedChannel}
+        />
+        <div className="w-full flex flex-col pt-10 overflow-y-auto h-[100vh]">
           <div
             ref={scrollElement}
             id="scrollElement"
             className="flex-1 overflow-y-scroll p-4 px-14"
           >
-            {messages.map((msg) => (
-              <ChatUI
-                key={msg.id}
-                message={msg}
-                currentUser={userID}
-                updateMessage={updateMessage}
-                deleteMessage={deleteMessage}
-              />
+            {messages.map((msg, index) => (
+              <div key={index}>
+                <ChatUI
+                  key={msg.id}
+                  message={msg}
+                  currentUser={userID}
+                  updateMessage={updateMessage}
+                  deleteMessage={deleteMessage}
+                />
+              </div>
             ))}
           </div>
 
