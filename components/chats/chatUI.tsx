@@ -1,5 +1,5 @@
 import { useState } from "react";
-import DateFormatter from "@/app/components/date";
+import DateFormatter from "@/components/date";
 import { Database } from "@/types/supabasetype";
 import userAvatar from "@/public/user.png";
 
@@ -117,10 +117,10 @@ export default function ChatUI({
             }  dark:border-gray-700`}
           >
             {isEditing ? (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 items-center">
                 <input
                   type="text"
-                  className="w-full border rounded p-2"
+                  className="w-full border rounded p-2 text-black"
                   value={editedMessage}
                   onChange={(e) => setEditedMessage(e.target.value)}
                 />
