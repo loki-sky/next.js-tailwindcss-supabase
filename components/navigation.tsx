@@ -11,7 +11,7 @@ const Navigation = ({ session }: { session: Session | null }) => {
   const supabase = createClientComponentClient();
 
   if (session === null) {
-    if (pathname?.includes("/profile") || pathname?.includes("/chats")) {
+    if (pathname?.includes("/chats")) {
       router.push("/");
     }
   }
