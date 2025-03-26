@@ -241,7 +241,7 @@ export default function SideBar({
           )}
         </div>
       </div>
-      <div>
+      <div className="flex justify-end">
         <button
           onClick={handleLogout}
           className="px-4 py-2 m-2 bg-red-600 text-white hover:bg-red-700 rounded-3xl"
